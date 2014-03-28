@@ -1,0 +1,4 @@
+#!/usr/bin/env ruby
+require 'front_end_tasks/cli'
+
+FrontEndTasks::CLI.start
