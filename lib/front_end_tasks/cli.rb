@@ -2,6 +2,7 @@ require 'thor'
 require 'front_end_tasks/optimizer'
 require 'front_end_tasks/server'
 require 'front_end_tasks/lint'
+require 'front_end_tasks/spec'
 
 module FrontEndTasks
 
@@ -27,8 +28,12 @@ module FrontEndTasks
     end
 
     desc "spec", "Run Jasmine specs"
-    def spec(directory)
-      #TODO: run phantom js
+    method_option :source_files, :type => :array
+    method_option :helper_files, :type => :array, :default => []
+    method_option :spec_files, :type => :array
+    method_option :port, :default => 8001
+    def spec()
+      Spec.run(options)
     end
 
   end
