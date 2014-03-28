@@ -25,4 +25,6 @@ Gem::Specification.new do |spec|
   spec.add_dependency "nokogiri", "~> 1.6.1"
   spec.add_dependency "uglifier", "~> 2.5.0"
   spec.add_dependency "yui-compressor", "~> 0.12.0"
+  spec.add_dependency "webrick", "~> 1.3.1"
+  spec.add_dependency "jshintrb", "~> 0.2.4"
 end
