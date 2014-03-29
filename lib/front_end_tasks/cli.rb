@@ -25,6 +25,8 @@ module FrontEndTasks
 
     desc "spec", "Run Jasmine specs"
     method_option :source_files, :type => :array
+    method_option :worker_file
+    method_option :public_root
     method_option :helper_files, :type => :array, :default => []
     method_option :spec_files, :type => :array
     method_option :port, :default => 8001

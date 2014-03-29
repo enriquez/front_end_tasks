@@ -2,7 +2,8 @@ require 'jasmine'
 
 module FrontEndTasks
   class Spec
-    ES5SHIM = File.expand_path(File.join(__dir__, '../..', 'vendor/es5-shim/es5-shim.js'))
+    ES5_SHIM    = File.expand_path(File.join(__dir__, '../..', 'vendor/es5-shim/es5-shim.js'))
+    WORKER_SHIM = File.expand_path(File.join(__dir__, '../..', 'vendor/worker-shim/worker-shim.js'))
 
     # mostly taken from https://github.com/pivotal/jasmine-gem/blob/master/lib/jasmine/tasks/jasmine.rake
     def self.run(opts)
@@ -11,10 +12,23 @@ module FrontEndTasks
       config.spec_dir = File.expand_path('./')
       config.ci_port = opts[:port]
 
+      if opts[:source_files]
+        source_files = opts[:source_files]
+      elsif opts[:worker_file]
+        source_files = []
+        source_files << '__worker-shim.js__'
+        config.add_rack_path('/__worker-shim.js__', lambda { Rack::File.new(WORKER_SHIM) })
+        js_doc = Documents::JsDocument.new(nil, File.read(opts[:worker_file]))
+        source_files += js_doc.included_scripts.map { |s| File.join(opts[:public_root], s) }
+        source_files << opts[:worker_file]
+      end
+
+      helper_files = opts[:helper_files] || []
+
       # hack the es5-shim to load before src files
-      config.add_rack_path('/__es5-shim.js__', lambda { Rack::File.new(ES5SHIM) })
-      config.src_files  = lambda { ['__es5-shim.js__'] + opts[:source_files] }
-      config.spec_files = lambda { opts[:helper_files] + opts[:spec_files] }
+      config.add_rack_path('/__es5-shim.js__', lambda { Rack::File.new(ES5_SHIM) })
+      config.src_files  = lambda { ['__es5-shim.js__'] + source_files }
+      config.spec_files = lambda { helper_files + opts[:spec_files] }
 
       server = Jasmine::Server.new(config.port(:ci), Jasmine::Application.app(config))
       t = Thread.new do

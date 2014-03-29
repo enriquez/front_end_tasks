@@ -24,7 +24,7 @@ module FrontEndTasks
         path_content_pairs
       end
 
-      def included_scripts(public_root)
+      def included_scripts(public_root = nil)
         paths = []
 
         import_scripts = @content.scan(/importScripts\(([^)]+)\)/)

@@ -66,7 +66,7 @@ module FrontEndTasks
         path_content_pairs
       end
 
-      def included_scripts(public_root)
+      def included_scripts(public_root = nil)
         script_nodes = @doc.xpath('//script')
         script_nodes.map { |n| n[:src] }
         script_nodes.map do |node|
