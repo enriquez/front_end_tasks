@@ -37,11 +37,19 @@ module FrontEndTasks
     end
 
     desc "list_scripts", "List dependent javascript files"
+    method_option :public_root
     def list_scripts(file)
-      root = File.dirname(file)
       content = File.read(File.expand_path(file))
-      doc = HtmlDocument.new(root, content)
-      puts doc.scripts
+      extension = File.extname(file).downcase
+      doc = nil
+
+      if extension == '.html'
+        doc = HtmlDocument.new(nil, content)
+      elsif extension == '.js'
+        doc = JsDocument.new(nil, content)
+      end
+
+      puts doc.included_scripts(options[:public_root])
     end
 
   end

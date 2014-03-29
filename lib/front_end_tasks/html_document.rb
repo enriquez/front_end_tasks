@@ -67,9 +67,16 @@ module FrontEndTasks
       path_content_pairs
     end
 
-    def scripts
+    def included_scripts(public_root)
       script_nodes = @doc.xpath('//script')
       script_nodes.map { |n| n[:src] }
+      script_nodes.map do |node|
+        if public_root
+          File.expand_path(File.join(public_root, node[:src]))
+        else
+          node[:src]
+        end
+      end
     end
 
     protected

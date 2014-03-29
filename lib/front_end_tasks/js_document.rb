@@ -30,6 +30,24 @@ module FrontEndTasks
       path_content_pairs
     end
 
+    def included_scripts(public_root)
+      paths = []
+
+      import_scripts = @content.scan(/importScripts\(([^)]+)\)/)
+      import_scripts.each do |import_script|
+        argument_content = import_script[0]
+        paths = argument_content.split(",").map { |p| p.strip.chop.reverse.chop.reverse }
+      end
+
+      paths.map do |path|
+        if public_root
+          File.expand_path(File.join(public_root, path))
+        else
+          path
+        end
+      end
+    end
+
     protected
     def find_worker_references(public_root, content)
       workers = []
@@ -52,16 +70,8 @@ module FrontEndTasks
     def replace_worker_import_scripts(public_root, content)
       updated_content = ''
 
-      import_scripts = content.scan(/importScripts\(([^)]+)\)/)
-      import_scripts.each do |import_script|
-        argument_content = import_script[0]
-        paths = argument_content.split(",").map { |p| p.strip.chop.reverse.chop.reverse }
-        paths.each do |path|
-          local_file_path = File.expand_path(File.join(public_root, path))
-
-          # append the contents of the imported script
-          updated_content << File.read(local_file_path)
-        end
+      included_scripts(public_root).each do |path|
+        updated_content << File.read(path)
       end
 
       # append the rest of the worker contents
