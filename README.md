@@ -1,6 +1,6 @@
-# FrontEndTasks
+# Front End Tasks
 
-Command line tool for client side web application development.
+Command line tool for client side web application development. Great for develoeprs who prefer to write plain html, css, and javascript that works without any special pre-processing. This tool helps optimize, lint, and test that code.
 
 # Installation
 
@@ -14,10 +14,42 @@ The `fe` command will be available after installing Front End Tasks.
 
 ## build
 
-Compiles the given html file by combining and minifying javascript and stylesheet tags according to speical html comments (see HTML Comments section). External references will be updated to be flattened to the same directory as the resulting combined javascript/css file.
+Compiles the given html file by combining and minifying javascript and stylesheet tags according to speical html comments (see HTML Comments section).
 
 ```bash
 $ fe build path/to/public_dir path/to/public_dir/index.html
+```
+
+## server
+
+Run a development server on localhost.
+
+```bash
+$ fe server --public_dir app/
+```
+
+## lint
+
+Run the given files through JSLint.
+
+```bash
+$ fe lint app/js/file_to_lint.js app/js/another_file.js
+```
+
+## spec
+
+Run Jasmine specs
+
+```bash
+$ fe spec --source_files app/js/post.js --spec_files spec/PostSpec.js
+```
+
+## list_scripts
+
+List the javascript files that are included in the html (script tags) or js (importScripts) file
+
+```bash
+$ fe list_scripts index.html
 ```
 
 # HTML Comments
@@ -62,7 +94,7 @@ Note: Only link tags that reference local urls are allowed between build:style a
 
 # External References
 
-Front End Tasks build will try to update any references to external files for you. These dependencies will be copied into the build directory, but their directory structure will be flattened... so keep the names of your dependent files unique.
+The build command will find any references to other files in the project and include them in the resulting build.
 
 ## Stylesheets
 
@@ -84,29 +116,29 @@ Turns into
 }
 ```
 
-The above file will be moved into the same directory as the combined stylesheet (remember that file paths from stylesheets are relative to the location of the calling stylesheet).
+The above font file will be moved into the same directory as the combined stylesheet (remember that file paths from stylesheets are relative to the location of the calling stylesheet).
+
+Note: Since all the files references from stylesheets are placed in the same directory, the filenames must be unique.
 
 ## Javascripts
 
-Javascript files may reference external scripts as Workers.
-
-The url referenced from a call to `new Worker(...)` is updated to be located in the same directory as the combined javascript file. For example, if the combined javascript file is located at js/scripts.min.js:
+Javascript files may have references to worker scripts. For example:
 
 ```js
-var worker = new Worker('js/workers/worker.js')
+var worker = new Worker('/js/workers/worker.js')
 ```
 
-Turns into
+The worker script references are kept the same. The worker script is copied to the build with the same directory structure. Worker scripts are then processed by replacing `importScripts` calls.
 
 ```js
-var worker = new Worker('js/worker.min.js')
+importScripts('/js/workers/worker_helper.js')
 ```
 
-The worker.js file is updated to replace calls to `importScripts` with the contents of the imported scripts. The worker is then minified and saved in the new location.
+The above is replaced with the contents of the given file, then the whole worker script is minified.
 
 # MIT License
 
-Copyright (c) 2014 Mike Enriquez (mike@enriquez.me)
+Copyright (c) 2014 Mike Enriquez (http://enriquez.me)
 
 MIT License
 
