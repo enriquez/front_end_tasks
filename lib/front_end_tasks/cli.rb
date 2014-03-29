@@ -8,7 +8,7 @@ module FrontEndTasks
     desc "build", "Builds the given files according to special build comments"
     method_option :result, :default => File.expand_path('./build')
     def build(public_dir, *files)
-      FrontEndTasks.build(public_dir, options[:result], files)
+      FrontEndTasks.build(public_dir, options[:result], *files)
     end
 
     desc "server", "Run a static site directory on localhost"
@@ -20,7 +20,7 @@ module FrontEndTasks
 
     desc "lint", "Run JSLint"
     def lint(*files)
-      FrontEndTasks.lint(files)
+      FrontEndTasks.lint(*files)
     end
 
     desc "spec", "Run Jasmine specs"
