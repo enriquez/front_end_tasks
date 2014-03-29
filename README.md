@@ -39,7 +39,7 @@ The above combine and minify app.js and home.js together into scripts.min.js
 <script src="/js/scripts.min.js"></script>
 ```
 
-Note: Only script tags are allowed between build:script and /build html comments.
+Note: Only script tags that reference local urls are allowed between build:script and /build html comments.
 
 ## build:style
 
@@ -58,7 +58,7 @@ The above becomes
 <link href="css/styles.min.css" rel="stylesheet">
 ```
 
-Note: Only link tags are allowed between build:style and /build html comments.
+Note: Only link tags that reference local urls are allowed between build:style and /build html comments.
 
 # External References
 
