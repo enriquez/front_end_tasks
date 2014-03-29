@@ -1,32 +1,42 @@
 require 'nokogiri'
 require 'uglifier'
 require 'yui/compressor'
+require 'front_end_tasks/js_document'
 
 module FrontEndTasks
 
   class HtmlDocument
 
-    def initialize(html_root, content)
-      @html_root = html_root
+    def initialize(public_root, content)
+      @public_root = public_root
       @doc = Nokogiri::HTML(content)
     end
 
     def compile
-      new_files = {}
+      path_content_pairs = {}
 
       script_groups.each do |group|
-        files = compile_scripts_group(group)
-        new_files.merge!(files)
+        combined_content = group[:files].inject('') { |content, file| content << File.read(file) }
+        combined_file_path = group[:combined_file_path]
+        js_document = JsDocument.new(@public_root, combined_content)
+        js_document.compiled_path = combined_file_path
+        new_files = js_document.compile
+
+        script_node = Nokogiri::XML::Node.new("script", @doc)
+        script_node[:src] = combined_file_path
+        replace_group(group, script_node)
+
+        path_content_pairs.merge!(new_files)
       end
 
       style_groups.each do |group|
         files = compile_styles_group(group)
-        new_files.merge!(files)
+        path_content_pairs.merge!(files)
       end
 
       comments.each { |c| c.remove }
 
-      new_files
+      path_content_pairs
     end
 
     def scripts
@@ -43,7 +53,7 @@ module FrontEndTasks
     def script_groups
       groups = groups_matching_opening_comment(/\s?build:script (\S+)\s?$/, :tag_name => 'script')
       groups.each do |group|
-        group[:files] = group[:elements].map { |e| File.join(@html_root, e[:src]) }
+        group[:files] = group[:elements].map { |e| File.join(@public_root, e[:src]) }
         group[:combined_file_path] = group[:args][0]
       end
       groups
@@ -52,7 +62,7 @@ module FrontEndTasks
     def style_groups
       groups = groups_matching_opening_comment(/\s?build:style (\S+)\s?$/, :tag_name => 'link')
       groups.each do |group|
-        group[:files] = group[:elements].map { |e| File.join(@html_root, e[:href]) }
+        group[:files] = group[:elements].map { |e| File.join(@public_root, e[:href]) }
         group[:combined_file_path] = group[:args][0]
       end
       groups
@@ -98,31 +108,6 @@ module FrontEndTasks
       group[:opening_comment].add_next_sibling(new_element)
     end
 
-    def compile_scripts_group(group)
-      new_files = {}
-      combined_file_path = group[:combined_file_path]
-      combined_root = File.dirname(combined_file_path)
-
-      combined_content, dependencies = parse_and_update_javascripts(combined_root, group[:files])
-
-      dependencies.each_pair do |file_path, contents|
-        combined_worker = parse_and_update_worker(contents)
-        dependencies[file_path] = Uglifier.compile(combined_worker)
-      end
-      combined_content = Uglifier.compile(combined_content)
-
-      new_files.merge!({
-        combined_file_path => combined_content
-      })
-      new_files.merge!(dependencies)
-
-      script_node = Nokogiri::XML::Node.new("script", @doc)
-      script_node[:src] = combined_file_path
-      replace_group(group, script_node)
-
-      new_files
-    end
-
     def compile_styles_group(group)
       new_files = {}
       combined_file_path = group[:combined_file_path]
@@ -144,52 +129,6 @@ module FrontEndTasks
       replace_group(group, link_node)
 
       new_files
-    end
-
-    def parse_and_update_javascripts(root, file_paths)
-      output = ''
-      workers = {}
-
-      file_paths.each do |f|
-        contents = File.read(f)
-
-        worker_references = contents.scan(/Worker\(['"](.*)['"]\)/)
-        worker_references.each do |worker_reference|
-          url = worker_reference[0].strip
-          filename = File.basename(url).split("?")[0].split("#")[0]
-          local_file_path = File.expand_path(File.join(@html_root, File.dirname(url), filename))
-          new_path = File.join(root, filename)
-
-          # flatten url to down to just basename (including ? and # junk)
-          contents.sub!(url, new_path)
-
-          # get worker contents
-          workers[new_path] = File.read(local_file_path)
-        end
-
-        output << contents
-      end
-
-      [output, workers]
-    end
-
-    def parse_and_update_worker(worker_content)
-      output = ''
-
-      import_scripts = worker_content.scan(/importScripts\(([^)]+)\)/)
-      import_scripts.each do |import_script|
-        argument_content = import_script[0]
-        import_scripts_content = ''
-        paths = argument_content.split(",").map { |p| p.strip.chop.reverse.chop.reverse }
-        paths.each do |path|
-          local_file_path = File.expand_path(File.join(@html_root, path))
-          output << File.read(local_file_path)
-        end
-      end
-
-      output << worker_content.gsub(/importScripts\(([^)]+)\);/, '')
-
-      output
     end
 
     def parse_and_update_stylesheets(root, file_paths)
