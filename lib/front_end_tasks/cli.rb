@@ -36,6 +36,14 @@ module FrontEndTasks
       Spec.run(options)
     end
 
+    desc "list_scripts", "List dependent javascript files"
+    def list_scripts(file)
+      root = File.dirname(file)
+      content = File.read(File.expand_path(file))
+      doc = HtmlDocument.new(root, content)
+      puts doc.scripts
+    end
+
   end
 
 end

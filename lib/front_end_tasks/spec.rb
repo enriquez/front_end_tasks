@@ -1,16 +1,19 @@
-require 'json'
 require 'jasmine'
-require 'jasmine/config'
+
 
 module FrontEndTasks
   class Spec
+    ES5SHIM = File.expand_path(File.join(__dir__, '../..', 'vendor/es5-shim/es5-shim.js'))
 
-    # taken from https://github.com/pivotal/jasmine-gem/blob/master/lib/jasmine/tasks/jasmine.rake
+    # mostly taken from https://github.com/pivotal/jasmine-gem/blob/master/lib/jasmine/tasks/jasmine.rake
     def self.run(opts)
       config = Jasmine.config
       config.src_dir  = File.expand_path('./')
       config.spec_dir = File.expand_path('./')
-      config.src_files  = lambda { opts[:source_files] }
+
+      # hack the es5-shim to load before src files
+      config.add_rack_path('/__es5-shim.js__', lambda { Rack::File.new(ES5SHIM) })
+      config.src_files  = lambda { ['__es5-shim.js__'] + opts[:source_files] }
       config.spec_files = lambda { opts[:helper_files] + opts[:spec_files] }
 
       server = Jasmine::Server.new(config.port(:ci), Jasmine::Application.app(config))

@@ -29,6 +29,11 @@ module FrontEndTasks
       new_files
     end
 
+    def scripts
+      script_nodes = @doc.xpath('//script')
+      script_nodes.map { |n| n[:src] }
+    end
+
     def to_html
       html = @doc.to_html.gsub(/\n\s*\n/, "\n")
     end
