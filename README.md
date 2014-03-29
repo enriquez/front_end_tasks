@@ -8,9 +8,11 @@ Command line tool for client side web application development. Great for develoe
 $ gem install front_end_tasks
 ```
 
+The `fe` command will be available after installing Front End Tasks.
+
 # Usage
 
-The `fe` command will be available after installing Front End Tasks.
+Front End Tasks can be used from the command line or scripted with Ruby.
 
 ## build
 
@@ -18,6 +20,10 @@ Compiles the given html file by combining and minifying javascript and styleshee
 
 ```bash
 $ fe build path/to/public_dir path/to/public_dir/index.html
+```
+
+```ruby
+FrontEndTasks.build('path/to/public_dir', './build', 'path/to/public_dir/index.html')
 ```
 
 ## server
@@ -28,12 +34,20 @@ Run a development server on localhost.
 $ fe server --public_dir app/
 ```
 
+```ruby
+FrontEndTasks.server(:public_dir => './app')
+```
+
 ## lint
 
 Run the given files through JSLint.
 
 ```bash
 $ fe lint app/js/file_to_lint.js app/js/another_file.js
+```
+
+```ruby
+FrontEndTasks.lint('./app/js/file_to_lint.js', './app/js/another_file.js')
 ```
 
 ## spec
@@ -44,12 +58,23 @@ Run Jasmine specs
 $ fe spec --source_files app/js/post.js --spec_files spec/PostSpec.js
 ```
 
+```ruby
+FrontEndTasks.spec({
+  :source_files => ['app/js/post.js'],
+  :spec_files   => ['spec/PostSpec.js']
+})
+```
+
 ## list_scripts
 
 List the javascript files that are included in the html (script tags) or js (importScripts) file
 
 ```bash
-$ fe list_scripts index.html
+$ fe list_scripts ./app/index.html
+```
+
+```ruby
+FrontEndTasks.list_scripts('./app/index.html')
 ```
 
 # HTML Comments
