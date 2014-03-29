@@ -1,11 +1,12 @@
 require 'nokogiri'
-require 'uglifier'
-require 'yui/compressor'
 require 'front_end_tasks/js_document'
+require 'front_end_tasks/css_document'
 
 module FrontEndTasks
 
   class HtmlDocument
+
+    attr_accessor :compiled_path
 
     def initialize(public_root, content)
       @public_root = public_root
@@ -30,11 +31,38 @@ module FrontEndTasks
       end
 
       style_groups.each do |group|
-        files = compile_styles_group(group)
-        path_content_pairs.merge!(files)
+        combined_file_path = group[:combined_file_path]
+        combined_content = ''
+
+        group[:files].each do |file|
+          content = File.read(file)
+          updated_content, assets = CssDocument.find_and_update_url_references(File.dirname(file), File.dirname(combined_file_path), content)
+
+          assets.each do |asset|
+            new_files = asset.compile
+            path_content_pairs.merge!(new_files)
+          end
+
+          combined_content << updated_content
+        end
+
+        css_document = CssDocument.new(@public_root, combined_content)
+        css_document.compiled_path = combined_file_path
+        new_files = css_document.compile
+
+        link_node = Nokogiri::XML::Node.new("link", @doc)
+        link_node[:href] = combined_file_path
+        link_node[:rel] = "stylesheet"
+        replace_group(group, link_node)
+
+        path_content_pairs.merge!(new_files)
       end
 
       comments.each { |c| c.remove }
+
+      path_content_pairs.merge!({
+        @compiled_path => @doc.to_html.gsub(/\n\s*\n/, "\n")
+      })
 
       path_content_pairs
     end
@@ -42,10 +70,6 @@ module FrontEndTasks
     def scripts
       script_nodes = @doc.xpath('//script')
       script_nodes.map { |n| n[:src] }
-    end
-
-    def to_html
-      html = @doc.to_html.gsub(/\n\s*\n/, "\n")
     end
 
     protected
@@ -106,56 +130,6 @@ module FrontEndTasks
     def replace_group(group, new_element)
       group[:elements].each { |e| e.remove }
       group[:opening_comment].add_next_sibling(new_element)
-    end
-
-    def compile_styles_group(group)
-      new_files = {}
-      combined_file_path = group[:combined_file_path]
-      combined_root = File.dirname(combined_file_path)
-
-      combined_content, dependencies = parse_and_update_stylesheets(combined_root, group[:files])
-
-      compressor = YUI::CssCompressor.new
-      combined_content = compressor.compress(combined_content)
-
-      new_files.merge!({
-        combined_file_path => combined_content
-      })
-      new_files.merge!(dependencies)
-
-      link_node = Nokogiri::XML::Node.new("link", @doc)
-      link_node[:href] = combined_file_path
-      link_node[:rel] = "stylesheet"
-      replace_group(group, link_node)
-
-      new_files
-    end
-
-    def parse_and_update_stylesheets(root, file_paths)
-      output = ''
-      dependencies = {}
-
-      file_paths.each do |f|
-        contents = File.read(f)
-
-        url_references = contents.scan(/url\(\s?['"](.*?)['"]\s?\)/)
-        url_references.each do |url_reference|
-          url = url_reference[0].strip
-          filename = File.basename(url).split("?")[0].split("#")[0]
-          local_file_path = File.expand_path(File.join(File.dirname(f), File.dirname(url), filename))
-          new_path = File.join(root, filename)
-
-          # flatten url to down to just basename (including ? and # junk)
-          contents.sub!(url, File.basename(url))
-
-          # get dependency contents
-          dependencies[new_path] = File.read(local_file_path)
-        end
-
-        output << contents
-      end
-
-      [output, dependencies]
     end
 
   end
