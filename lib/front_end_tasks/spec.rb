@@ -1,6 +1,5 @@
 require 'jasmine'
 
-
 module FrontEndTasks
   class Spec
     ES5SHIM = File.expand_path(File.join(__dir__, '../..', 'vendor/es5-shim/es5-shim.js'))
@@ -10,6 +9,7 @@ module FrontEndTasks
       config = Jasmine.config
       config.src_dir  = File.expand_path('./')
       config.spec_dir = File.expand_path('./')
+      config.ci_port = opts[:port]
 
       # hack the es5-shim to load before src files
       config.add_rack_path('/__es5-shim.js__', lambda { Rack::File.new(ES5SHIM) })
@@ -37,7 +37,7 @@ module FrontEndTasks
       runner = config.runner.call(Jasmine::Formatters::Multi.new(formatters), url)
       runner.run
 
-      abort unless exit_code_formatter.succeeded?
+      exit(1) unless exit_code_formatter.succeeded?
     end
 
   end
