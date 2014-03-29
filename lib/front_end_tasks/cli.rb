@@ -1,8 +1,5 @@
 require 'thor'
-require 'front_end_tasks/optimizer'
-require 'front_end_tasks/server'
-require 'front_end_tasks/lint'
-require 'front_end_tasks/spec'
+require 'front_end_tasks'
 
 module FrontEndTasks
 
@@ -11,20 +8,19 @@ module FrontEndTasks
     desc "build", "Builds the given files according to special build comments"
     method_option :result, :default => File.expand_path('./build')
     def build(public_dir, *files)
-      optimizer = Optimizer.new(public_dir, files)
-      optimizer.build_to(options[:result])
+      FrontEndTasks.build(public_dir, options[:result], files)
     end
 
     desc "server", "Run a static site directory on localhost"
     method_option :public_dir, :default => File.expand_path('./build')
     method_option :port, :default => 8000
-    def server()
-      Server.start(options)
+    def server
+      FrontEndTasks.server(options)
     end
 
     desc "lint", "Run JSLint"
     def lint(*files)
-      Lint.report(files)
+      FrontEndTasks.lint(files)
     end
 
     desc "spec", "Run Jasmine specs"
@@ -32,24 +28,14 @@ module FrontEndTasks
     method_option :helper_files, :type => :array, :default => []
     method_option :spec_files, :type => :array
     method_option :port, :default => 8001
-    def spec()
-      Spec.run(options)
+    def spec
+      FrontEndTasks.spec(options)
     end
 
     desc "list_scripts", "List dependent javascript files"
     method_option :public_root
     def list_scripts(file)
-      content = File.read(File.expand_path(file))
-      extension = File.extname(file).downcase
-      doc = nil
-
-      if extension == '.html'
-        doc = HtmlDocument.new(nil, content)
-      elsif extension == '.js'
-        doc = JsDocument.new(nil, content)
-      end
-
-      puts doc.included_scripts(options[:public_root])
+      puts FrontEndTasks.list_scripts(file, options[:public_root])
     end
 
   end
