@@ -2,7 +2,7 @@
 
 Command line tool for client side web application development. Great for develoeprs who prefer to write plain html, css, and javascript that works without any special pre-processing. This tool helps optimize, lint, and test that code.
 
-# Installation
+## Installation
 
 ```bash
 $ gem install front_end_tasks
@@ -10,11 +10,11 @@ $ gem install front_end_tasks
 
 The `fe` command will be available after installing Front End Tasks.
 
-# Usage
+## Usage
 
 Front End Tasks can be used from the command line or scripted with Ruby.
 
-## build
+### build
 
 Compiles the given html file by combining and minifying javascript and stylesheet tags according to speical html comments (see HTML Comments section).
 
@@ -26,7 +26,7 @@ $ fe build path/to/public_dir path/to/public_dir/index.html
 FrontEndTasks.build('path/to/public_dir', './build', 'path/to/public_dir/index.html')
 ```
 
-## server
+### server
 
 Run a development server on localhost.
 
@@ -38,7 +38,7 @@ $ fe server --public_dir app/
 FrontEndTasks.server(:public_dir => './app')
 ```
 
-## lint
+### lint
 
 Run the given files through JSLint.
 
@@ -50,7 +50,7 @@ $ fe lint app/js/file_to_lint.js app/js/another_file.js
 FrontEndTasks.lint('./app/js/file_to_lint.js', './app/js/another_file.js')
 ```
 
-## spec
+### spec
 
 Run Jasmine specs
 
@@ -65,7 +65,7 @@ FrontEndTasks.spec({
 })
 ```
 
-## gzip
+### gzip
 
 Create a compressed .gz version of the given files
 
@@ -77,7 +77,7 @@ $ fe gzip app/js/app.js app/js/home.js
 FrontEndTasks.gzip('app/js/app.js', 'app/js/home.js')
 ```
 
-## list_scripts
+### list_scripts
 
 List the javascript files that are included in the html (script tags) or js (importScripts) file
 
@@ -89,9 +89,9 @@ $ fe list_scripts ./app/index.html
 FrontEndTasks.list_scripts('./app/index.html')
 ```
 
-# HTML Comments
+## HTML Comments
 
-## build:script
+### build:script
 
 Combine and minify scripts. Takes an argument that specifies the resulting file. See the following example
 
@@ -110,7 +110,7 @@ The above combine and minify app.js and home.js together into scripts.min.js
 
 Note: Only script tags that reference local urls are allowed between build:script and /build html comments.
 
-## build:style
+### build:style
 
 Similar to build:script, but for stylesheets
 
@@ -129,11 +129,11 @@ The above becomes
 
 Note: Only link tags that reference local urls are allowed between build:style and /build html comments.
 
-# External References
+## External References
 
 The build command will find any references to other files in the project and include them in the resulting build.
 
-## Stylesheets
+### Stylesheets
 
 CSS Files may reference fonts, images, etc... by using `url(...)`.
 
@@ -157,7 +157,7 @@ The above font file will be moved into the same directory as the combined styles
 
 Note: Since all the files references from stylesheets are placed in the same directory, the filenames must be unique.
 
-## Javascripts
+### Javascripts
 
 Javascript files may have references to worker scripts. For example:
 
@@ -173,7 +173,7 @@ importScripts('/js/workers/worker_helper.js')
 
 The above is replaced with the contents of the given file, then the whole worker script is minified.
 
-# MIT License
+## MIT License
 
 Copyright (c) 2014 Mike Enriquez (http://enriquez.me)
 
