@@ -6,7 +6,7 @@ module FrontEndTasks
   module Documents
     class CssDocument < BaseDocument
 
-      def compile
+      def compile(opts = {})
         compressor = YUI::CssCompressor.new
         compiled_content = compressor.compress(@content)
 

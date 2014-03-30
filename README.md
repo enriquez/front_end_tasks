@@ -23,7 +23,7 @@ $ fe build path/to/public_dir path/to/public_dir/index.html
 ```
 
 ```ruby
-FrontEndTasks.build('path/to/public_dir', './build', 'path/to/public_dir/index.html')
+FrontEndTasks.build('path/to/public_dir', './build', ['path/to/public_dir/index.html'])
 ```
 
 ### server

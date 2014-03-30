@@ -10,13 +10,11 @@ module FrontEndTasks
       @files    = files.map { |f| File.expand_path(f) }
     end
 
-    def build_to(result_dir)
+    def build_to(result_dir, opts = {})
       @files.each do |file|
-        html_filename = File.basename(file)
-        html_doc = Documents::HtmlDocument.new(@public_dir, File.read(file))
-        html_doc.compiled_path = html_filename
-
-        files = html_doc.compile
+        doc = Documents.create(@public_dir, file)
+        doc.compiled_path = File.basename(file)
+        files = doc.compile(opts)
 
         files.each_pair do |file, contents|
           save_file(File.join(result_dir, file), contents)

@@ -9,9 +9,9 @@ require 'front_end_tasks/documents'
 
 module FrontEndTasks
 
-  def self.build(public_dir, build_dir, *files)
+  def self.build(public_dir, build_dir, files, opts = {})
     optimizer = Optimizer.new(public_dir, files)
-    optimizer.build_to(build_dir)
+    optimizer.build_to(build_dir, opts)
   end
 
   def self.gzip(*files)

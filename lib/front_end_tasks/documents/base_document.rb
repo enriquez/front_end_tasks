@@ -9,7 +9,7 @@ module FrontEndTasks
         @content     = content
       end
 
-      def compile
+      def compile(opts = {})
         raise NotImplementedError.new('Must override "compile" in subclass')
       end
 

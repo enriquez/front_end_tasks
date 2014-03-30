@@ -12,7 +12,7 @@ module FrontEndTasks
         @doc = Nokogiri::HTML(content)
       end
 
-      def compile
+      def compile(opts = {})
         path_content_pairs = {}
 
         script_groups.each do |group|
@@ -20,7 +20,7 @@ module FrontEndTasks
           combined_file_path = group[:combined_file_path]
           js_document = JsDocument.new(@public_root, combined_content)
           js_document.compiled_path = combined_file_path
-          new_files = js_document.compile
+          new_files = js_document.compile(opts)
 
           script_node = Nokogiri::XML::Node.new("script", @doc)
           script_node[:src] = combined_file_path

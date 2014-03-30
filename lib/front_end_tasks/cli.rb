@@ -6,9 +6,10 @@ module FrontEndTasks
   class CLI < Thor
 
     desc "build", "Builds the given files according to special build comments"
+    method_option :js_concat_only, :type => :boolean
     method_option :result, :default => File.expand_path('./build')
     def build(public_dir, *files)
-      FrontEndTasks.build(public_dir, options[:result], *files)
+      FrontEndTasks.build(public_dir, options[:result], files, options)
     end
 
     desc "gzip", "Creates a compressed .gz version of the given file"

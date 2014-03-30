@@ -4,7 +4,7 @@ module FrontEndTasks
   module Documents
     class AssetDocument < BaseDocument
 
-      def compile
+      def compile(opts = {})
         {
           @compiled_path => @content
         }

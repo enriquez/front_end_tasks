@@ -5,7 +5,7 @@ module FrontEndTasks
   module Documents
     class JsDocument < BaseDocument
 
-      def compile
+      def compile(opts = {})
         path_content_pairs = {}
 
         workers = find_worker_references(@public_root, @content)
@@ -16,10 +16,16 @@ module FrontEndTasks
 
         @content = replace_worker_import_scripts(@public_root, @content)
 
-        compiled_content = Uglifier.compile(@content)
-        path_content_pairs.merge!({
-          @compiled_path => compiled_content
-        })
+        if opts[:js_concat_only]
+          path_content_pairs.merge!({
+            @compiled_path => @content
+          })
+        else
+          compiled_content = Uglifier.compile(@content)
+          path_content_pairs.merge!({
+            @compiled_path => compiled_content
+          })
+        end
 
         path_content_pairs
       end
