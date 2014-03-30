@@ -65,6 +65,18 @@ FrontEndTasks.spec({
 })
 ```
 
+## gzip
+
+Create a compressed .gz version of the given files
+
+```bash
+$ fe gzip app/js/app.js app/js/home.js
+```
+
+```ruby
+FrontEndTasks.gzip('app/js/app.js', 'app/js/home.js')
+```
+
 ## list_scripts
 
 List the javascript files that are included in the html (script tags) or js (importScripts) file

@@ -1,6 +1,7 @@
 require "front_end_tasks/version"
 
 require 'front_end_tasks/optimizer'
+require 'front_end_tasks/gzip'
 require 'front_end_tasks/server'
 require 'front_end_tasks/lint'
 require 'front_end_tasks/spec'
@@ -11,6 +12,10 @@ module FrontEndTasks
   def self.build(public_dir, build_dir, *files)
     optimizer = Optimizer.new(public_dir, files)
     optimizer.build_to(build_dir)
+  end
+
+  def self.gzip(*files)
+    Gzip.compress(*files)
   end
 
   def self.server(options)

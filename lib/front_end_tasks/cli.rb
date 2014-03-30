@@ -11,6 +11,11 @@ module FrontEndTasks
       FrontEndTasks.build(public_dir, options[:result], *files)
     end
 
+    desc "gzip", "Creates a compressed .gz version of the given file"
+    def gzip(*files)
+      FrontEndTasks.gzip(*files)
+    end
+
     desc "server", "Run a static site directory on localhost"
     method_option :public_dir, :default => File.expand_path('./build')
     method_option :port, :default => 8000
