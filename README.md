@@ -129,6 +129,76 @@ The above becomes
 
 Note: Only link tags that reference local urls are allowed between build:style and /build html comments.
 
+## HTML Script Target Attributes
+
+The build command accepts a `src_targets` option. It is useful for including certain versions of a script. For example, Ember.js comes with a development version with debugging tools and a lighter weight production version. We can include Ember into our HTML like this:
+
+```html
+<script src="ember.js"
+  build-production-src="ember.prod.js"></script>
+```
+
+By default, we use the `ember.js` development version by specifying it with the `src` attribute. To build for production we can pass the `src_targets` option to the build command
+
+```bash
+$ fe build path/to/public_dir path/to/public_dir/index.html --src_targets=production
+```
+
+```ruby
+FrontEndTasks.build('path/to/public_dir', './build', ['path/to/public_dir/index.html'], :src_targets => ['production'])
+```
+
+It is possible to specify multiple `src_targets`.
+
+### Target specific script
+
+The `src` attribute may be omitted if it is only relevant for a target. This is useful for including a script for a test target only.
+
+```html
+<script build-test-src="tests/app_tests.js"></script>
+```
+
+The above script is not included in development (since the `src` is not specified), but it can be included when running the build command with `test` included in `src_targets`.
+
+### Full example
+
+```html
+<script src="ember.js"
+  build-production-src="ember.prod.js"></script>
+<script src="config/development.js"
+  build-bitcoin-mainnet-src="config/bitcoin_mainnet.js"
+  build-bitcoin-testnet-src="config/bitcoin_testnet.js"></script>
+<script build-test-src="tests/app_tests.js"></script>
+```
+
+The following combination of `src_targets` will include the specified scripts.
+
+#### No src_targets
+
+* ember.js
+* config/development.js
+
+#### src_targets=production
+
+* ember.prod.js
+* config/development.js
+
+#### src_targets=production bitcoin-mainnet
+
+* ember.prod.js
+* config/bitcoin_mainnet.js
+
+#### src_targets=bitcoin-testnet
+
+* ember.js
+* config/bitcoin_testnet.js
+
+#### src_targets=test
+
+* ember.js
+* config/development.js
+* tests/app_tests.js
+
 ## External References
 
 The build command will find any references to other files in the project and include them in the resulting build.

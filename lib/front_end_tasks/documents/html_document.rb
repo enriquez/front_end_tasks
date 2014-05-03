@@ -14,8 +14,9 @@ module FrontEndTasks
 
       def compile(opts = {})
         path_content_pairs = {}
+        src_targets = opts[:src_targets] || []
 
-        script_groups.each do |group|
+        script_groups(src_targets).each do |group|
           combined_content = group[:files].inject('') { |content, file| content << File.read(file) }
           combined_file_path = group[:combined_file_path]
           js_document = JsDocument.new(@public_root, combined_content)
@@ -80,10 +81,18 @@ module FrontEndTasks
 
       protected
 
-      def script_groups
+      def script_groups(src_targets)
+        src_target_attributes = src_targets.map { |t| "build-#{t}-src" }
         groups = groups_matching_opening_comment(/\s?build:script (\S+)\s?$/, :tag_name => 'script')
         groups.each do |group|
-          group[:files] = group[:elements].map { |e| File.join(@public_root, e[:src]) }
+          group[:files] = group[:elements].map do |element|
+            src = src_target_attributes.detect { |attribute| element.attribute(attribute) } || 'src'
+            if element[src]
+              File.join(@public_root, element[src])
+            else
+              nil
+            end
+          end.compact
           group[:combined_file_path] = group[:args][0]
         end
         groups
